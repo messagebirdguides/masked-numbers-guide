@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Ridesharing Admin</title>
+</head>
+
+<body>
+    <h1>Ridesharing Admin</h1>
+    <h2>All proxy numbers</h2>
+    <ul>{{#each proxy_numbers}}
+        <li>{{this.number}}</li>{{/each}}</ul>
+    <h2>Current Rides</h2>
+    <table border="1">
+        <tr>
+            <th>Customer</th>
+            <th>Driver</th>
+            <th>Start</th>
+            <th>Destination</th>
+            <th>Date and Time</th>
+            <th>Proxy Number</th>
+        </tr>
+        {{#each rides}}
+        <tr>
+            <td>{{this.customer}}</td>
+            <td>{{this.driver}}</td>
+            <td>{{this.start}}</td>
+            <td>{{this.destination}}</td>
+            <td>{{this.datetime}}</td>
+            <td>{{this.number}}</td>
+        </tr>
+        {{/each}}
+    </table>
+    <h2>Create a Ride</h2>
+    <form action="/createride" method="post">
+        <div>
+            <label>Customer:</label>
+            <br />
+            <select name="customer">{{#each customers}}
+                <option value="{{this.id}}">{{this.name}} ({{this.number}})</option>{{/each}}</select>
+        </div>
+        <div>
+            <label>Driver:</label>
+            <br />
+            <select name="driver">{{#each drivers}}
+                <option value="{{this.id}}">{{this.name}} ({{this.number}})</option>{{/each}}</select>
+        </div>
+        <div>
+            <label>Start (location):</label>
+            <br />
+            <input type="text" name="start" />
+        </div>
+        <div>
+            <label>Destination (location):</label>
+            <br />
+            <input type="text" name="destination" />
+        </div>
+        <div>
+            <label>Date and Time:</label>
+            <br />
+            <input type="text" name="datetime" />
+        </div>
+        <div>
+            <input type="submit" value="Create Ride" />
+        </div>
+    </form>
+</body>
+
+</html>
