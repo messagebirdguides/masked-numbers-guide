@@ -25,7 +25,7 @@ BirdCar's sample application uses Node.js with the [Express](https://expressjs.c
 
 First, let's make sure Node and npm are installed on your computer. If not, download both [from npmjs.com](https://www.npmjs.com/get-npm).
 
-We've provided the source code [in a GitHub repository](https://github.com), so you can either clone the sample application with git or download a ZIP file with the code to your computer.
+We've provided the source code [in a GitHub repository](https://github.com/messagebirdguides/masked-numbers-guide), so you can either clone the sample application with git or download a ZIP file with the code to your computer.
 
 To install the [MessageBird SDK for NodeJS](https://www.npmjs.com/package/messagebird) and the other dependencies mentioned above, open a console pointed at the directory into which you've stored the sample application and run the following command:
 
@@ -370,7 +370,7 @@ You've just built your own number masking system with MessageBird!
 
 You can now use the flow, code snippets and UI examples from this tutorial as an inspiration to build your own custom notification system.
 
-Running into issues? Explore the [complete code on GitHub](https://github.com) to see whether you might have missed something. 
+Running into issues? Explore the [complete code on GitHub](https://github.com/messagebirdguides/masked-numbers-guide) to see whether you might have missed something. 
 
 ## Next steps
 
