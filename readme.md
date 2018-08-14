@@ -1,19 +1,19 @@
 # Masked Phone Numbers
 ### ⏱ 30 min build time
 
-No matter how seamless the user experience may be, the need for direct communication between two parties to complete a transaction can always arise. Online service platforms, such as ridesharing, online food delivery and logistics, facilitate the experience between customers and providers by matching both sides of the transaction to ensure everything runs smoothly and the transaction is completed. That is, everyone's happy :)
+## Why build a number masking application? 
 
-Sometimes, though, the experience doesn't quite go to plan and it becomes necessary for customers and providers to talk to or message each other directly.
+Online service platforms, such as ridesharing, online food delivery and logistics, facilitate the experience between customers and providers by matching both sides of the transaction to ensure everything runs smoothly and the transaction is completed. That is, everyone's happy :)
 
-The problem then arises that, for many reasons, both parties may not feel comfortable sharing their personal phone number.
+Sometimes, though, the experience doesn't quite go to plan and it becomes necessary for customers and providers to talk to or message each other directly. The problem then arises that, for many reasons, both parties may not feel comfortable sharing their personal phone number.
 
 A great solution to this issue is using anonymous proxy phone numbers that mask a user's personal phone number while also protecting the platform's personal contact details. The result, a customer doesn't see their provider's phone number but, instead, a number that belongs to the platform and forwards their call to the provider, and vice versa for providers as well.
 
-In this guide, we'll show you a proxy system to mask phone numbers for a ficticious ridesharing platform, BirdCar, implemented in Node.js. BirdCar matches customers with drivers. The sample application includes a data model for customers, drivers, rides and proxy phone numbers and allows setting up new rides from an admin interface for demonstration purposes.
+In this guide, we'll show you how to build a proxy system to mask phone numbers for our ficticious ridesharing platform, BirdCar, implemented in Node.js. The sample application includes a data model for customers, drivers, rides and proxy phone numbers and allows setting up new rides from an admin interface for demonstration purposes.
 
 ## Using a Number Pool
 
-Before we dive into building the sample application, let's take a moment to explain the concept of a number pool. The idea is to set up a list of numbers by purchasing one or more [virtual mobile numbers](https://www.messagebird.com/numbers) from MessageBird and adding them to a database. Whenever a ride is created, the BirdCar application, that we're about to build, will automatically search the pool for one that is available and then assign it.
+Before we dive into building the sample application, let's take a moment to understand the concept of a number pool. The idea is to set up a list of numbers by purchasing one or more [virtual mobile numbers](https://www.messagebird.com/numbers) from MessageBird and adding them to a database. Whenever a ride is created, the BirdCar application will automatically search the pool for one that is available and then assign it.
 
 For simplicity and to allow testing with a single number, BirdCar assigns only one number to each ride, not one for each party. If the customer calls or texts this number, they get connected to the driver. And if the driver rings, the call or text is forwarded to the customer. The incoming caller or message sender identification sent from the network is used to determine which party calls and consequently find the other party's number.
 
@@ -25,7 +25,7 @@ BirdCar's sample application uses Node.js with the [Express](https://expressjs.c
 
 First, let's make sure Node and npm are installed on your computer. If not, download both [from npmjs.com](https://www.npmjs.com/get-npm).
 
-We've provided the source code [in a GitHub repository](https://github.com/messagebirdguides/masked-numbers-guide), so you can either clone the sample application with git or download a ZIP file with the code to your computer.
+We've provided the source code in the [MessageBird Developer Guides GitHub repository](https://github.com/messagebirdguides/masked-numbers-guide), so you can either clone the sample application with git or download a ZIP file with the code to your computer.
 
 To install the [MessageBird SDK for NodeJS](https://www.npmjs.com/package/messagebird) and the other dependencies mentioned above, open a console pointed at the directory into which you've stored the sample application and run the following command:
 
@@ -41,7 +41,7 @@ The BirdCar system receives incoming messages and calls and forwards them. From 
 
 ### Exposing your Development Server with localtunnel
 
-When working with webhooks, an external service like MessageBird needs to access your application, so the webhook URL must be public. During development, though, you're typically working in a local development environment that is not publicly available. Thankfully this is not a massive roadblock since various tools and services allow you to quickly expose your development environment to the Internet by providing a tunnel from a public URL to your local machine. One of these tools is [localtunnel.me](https://localtunnel.me), which is uniquely suited to NodeJS developers since you can comfortably install it using npm:
+When working with webhooks, an external service like MessageBird needs to access your application, so the webhook URL must be public. During development, though, you're typically working in a local development environment that is not publicly available. Thankfully this is not a massive roadblock since various tools and services allow you to quickly expose your development environment by providing a tunnel from a public URL to your local machine. One of these tools is [localtunnel.me](https://localtunnel.me), which is uniquely suited to NodeJS developers since you can comfortably install it using npm:
 
 ````bash
 npm install -g localtunnel
@@ -59,7 +59,7 @@ If you're facing problems with localtunnel.me, you can have a look at other comm
 
 ### Getting an Inbound Number
 
-A requirement for receiving messages and voice calls is a dedicated inbound number. Virtual mobile numbers look and work similar to regular mobile numbers, however, instead of being attached to a mobile device via a SIM card, they live in the cloud, i.e., a data center, and can process incoming SMS and voice calls. MessageBird offers numbers from different countries for a low monthly fee. Here's how to purchase one:
+A requirement for receiving messages and voice calls is a dedicated inbound number. Virtual mobile numbers look and work similar to regular mobile numbers, however, instead of being attached to a mobile device via a SIM card, they live in the cloud and can process incoming SMS and voice calls. Here's how to purchase a MessageBird virtual mobile number:
 
 1. Go to the [Numbers](https://dashboard.messagebird.com/en/numbers) section of your MessageBird account and click **Buy a number**.
 2. Choose the country in which you and your customers are located and make sure both the _SMS_ and _Voice_ capabilities are selected.
@@ -142,7 +142,7 @@ The `app.get('/')` route in `index.js` and the associated HTML page in `views/ad
 
 ## Creating a Ride
 
-The `app.post('/')` route defined in `index.js` handles the following steps when creating a new ride:
+The `app.post('/createride')` route defined in `index.js` handles the following steps when creating a new ride:
 
 ### Getting Customer and Driver Information
 
@@ -170,21 +170,21 @@ We need to get a number from the pool that was never assigned to a ride for the 
 In Javascript and SQL, this check looks like this:
 
 ````javascript
-// Find a number that has not been used by the driver or the customer
-db.get("SELECT * FROM proxy_numbers "
-    + "WHERE id NOT IN (SELECT number_id FROM rides WHERE customer_id = $customer) "
-    + "AND id NOT IN (SELECT number_id FROM rides WHERE driver_id = $driver)", {
-        $customer : customer.id,
-        $driver : driver.id,
-}, function(err, row) {
+            // Find a number that has not been used by the driver or the customer
+            db.get("SELECT * FROM proxy_numbers "
+                + "WHERE id NOT IN (SELECT number_id FROM rides WHERE customer_id = $customer) "
+                + "AND id NOT IN (SELECT number_id FROM rides WHERE driver_id = $driver)", {
+                    $customer : customer.id,
+                    $driver : driver.id,
+            }, function(err, row) {
 ````
 
 It's possible that no row was found. In that case, we alert the admin that the number pool is depleted and they should buy more numbers:
 
 ````javascript
-if (row == null) {
-    // No number found!
-    res.send("No number available! Please extend your pool.");
+                if (row == null) {
+                    // No number found!
+                    res.send("No number available! Please extend your pool.");
 ````
 
 ### Storing the Ride
@@ -192,42 +192,42 @@ if (row == null) {
 If a number was found, i.e., our query returned a row, we insert a new ride into the database using the information from the form:
 
 ````javascript
-} else {
-var proxyNumber = row;
+                 } else {
+                    var proxyNumber = row;
 
-// Store ride in database
-db.run("INSERT INTO rides (start, destination, datetime, customer_id, driver_id, number_id) VALUES ($start, $destination, $datetime, $customer, $driver,$number)", {
-    $start : req.body.start,
-    $destination : req.body.destination,
-    $datetime : req.body.datetime,
-    $customer : customer.id,
-    $driver : driver.id,
-    $number : proxyNumber.id
-});
+                    // Store ride in database
+                    db.run("INSERT INTO rides (start, destination, datetime, customer_id, driver_id, number_id) VALUES ($start, $destination, $datetime, $customer, $driver,$number)", {
+                        $start : req.body.start,
+                        $destination : req.body.destination,
+                        $datetime : req.body.datetime,
+                        $customer : customer.id,
+                        $driver : driver.id,
+                        $number : proxyNumber.id
+                    });
 ````
 
 ### Notifying Customer and Driver
 
-We send a message to both the customer and the driver to confirm the ride. This message should originate from the proxy number, so they can quickly reply to this message to reach the other party. For sending messages, the MessageBird SDK provides the `messagebird.message.create()` function. We need to call the function twice because we're sending two different versions of the message:
+We send a message to both the customer and the driver to confirm the ride. This message should originate from the proxy number, so they can quickly reply to this message to reach the other party. For sending messages, the MessageBird SDK provides the `messagebird.messages.create()` function. We need to call the function twice because we're sending two different versions of the message:
 
 ````javascript
-// Notify the customer
-messagebird.messages.create({
-    originator : proxyNumber.number,
-    recipients : [ customer.number ],
-    body : driver.name + " will pick you up at " + req.body.datetime + ". Reply to this message to contact the driver."
-}, function(err, response) {
-    console.log(err, response);
-});
+                    // Notify the customer
+                    messagebird.messages.create({
+                        originator : proxyNumber.number,
+                        recipients : [ customer.number ],
+                        body : driver.name + " will pick you up at " + req.body.datetime + ". Reply to this message to contact the driver."
+                    }, function(err, response) {
+                        console.log(err, response);
+                    });
 
-// Notify the driver
-messagebird.messages.create({
-    originator : proxyNumber.number,
-    recipients : [ driver.number ],
-    body : customer.name + " will wait for you at " + req.body.datetime + ". Reply to this message to contact the customer."
-}, function(err, response) {
-    console.log(err, response);
-});
+                    // Notify the driver
+                    messagebird.messages.create({
+                        originator : proxyNumber.number,
+                        recipients : [ driver.number ],
+                        body : customer.name + " will wait for you at " + req.body.datetime + ". Reply to this message to contact the customer."
+                    }, function(err, response) {
+                        console.log(err, response);
+                    });
 ````
 
 The response, or error, if any, is logged to the console, but we do not read or take any action based on them. In production applications, you should definitely check if the messages were sent successfully.
@@ -252,26 +252,26 @@ app.post('/webhook', function(req, res) {
 To find the ride, we use an SQL query which joins all four tables. We're interested in all entries in which the proxy number matches the `recipient` field from the webhook and the `originator` matches _either_ the driver's number _or_ the customer's number:
 
 ````javascript
-db.get("SELECT c.number AS customer_number, d.number AS driver_number, p.number AS proxy_number "
-    + "FROM rides r JOIN customers c ON r.customer_id = c.id JOIN drivers d ON r.driver_id = d.id JOIN proxy_numbers p ON p.id = r.number_id "
-    + "WHERE proxy_number = $proxy AND (driver_number = $number OR customer_number = $number)", {
-        $number : number,
-        $proxy : proxy
-    }, function(err, row) {
+    db.get("SELECT c.number AS customer_number, d.number AS driver_number, p.number AS proxy_number "
+        + "FROM rides r JOIN customers c ON r.customer_id = c.id JOIN drivers d ON r.driver_id = d.id JOIN proxy_numbers p ON p.id = r.number_id "
+        + "WHERE proxy_number = $proxy AND (driver_number = $number OR customer_number = $number)", {
+            $number : number,
+            $proxy : proxy
+        }, function(err, row) {
 ````
 
 After we've found the ride based on an _or_-condition, we need to check again which party was the actual sender and determine the recipient, i.e., the other party, from there:
 
 ````javascript
-if (row) {
-    // Got a match!
-    // Need to find out whether customer or driver sent this and forward to the other side
-    var recipient = "";
-    if (number == row.customer_number)
-        recipient = row.driver_number;
-    else
-    if (number == row.driver_number)
-        recipient = row.customer_number;                
+            if (row) {
+                // Got a match!
+                // Need to find out whether customer or driver sent this and forward to the other side
+                var recipient = "";
+                if (number == row.customer_number)
+                    recipient = row.driver_number;
+                else
+                if (number == row.driver_number)
+                    recipient = row.customer_number;                
 ````
 
 ### Forwarding Message
@@ -279,23 +279,23 @@ if (row) {
 We use `messagebird.messages.create()` to forward the message. The proxy number is used as the originator, and we send the original text to the recipient as determined above:
 
 ````javascript
-// Forward the message through the MessageBird API
-messagebird.messages.create({
-    originator : proxy,
-    recipients : [ recipient ],
-    body : text
-}, function(err, response) {
-    console.log(err, response);
-});
+		        // Forward the message through the MessageBird API
+                messagebird.messages.create({
+                    originator : proxy,
+                    recipients : [ recipient ],
+                    body : text
+                }, function(err, response) {
+                    console.log(err, response);
+                });
 ````
 
 If we don't find a ride, we log an error to the console:
 
 ````javascript
-} else {
-    // Cannot match numbers
-    console.log("Could not find a ride for customer/driver " + number + " that uses proxy " + proxy + ".");
-}
+	        } else {
+                // Cannot match numbers
+                console.log("Could not find a ride for customer/driver " + number + " that uses proxy " + proxy + ".");
+            }
 ````
 
 ## Receiving and Forwarding Voice Calls
@@ -328,10 +328,10 @@ This works exactly as described for the SMS webhooks, hence the SQL query and su
 To transfer the call, we return a short snippet of XML to MessageBird, and also log the action to the console:
 
 ````javascript
-// Create call flow to instruct transfer
-console.log("Transferring call to " + recipient);
-res.send('<?xml version="1.0" encoding="UTF-8"?>'
-    + '<Transfer destination="' + recipient + '" mask="true" />');
+                // Create call flow to instruct transfer
+                console.log("Transferring call to " + recipient);
+                res.send('<?xml version="1.0" encoding="UTF-8"?>'
+                    + '<Transfer destination="' + recipient + '" mask="true" />');
 ````
 
 The `<Transfer />` element takes two attributes: _destination_ indicates the number to transfer the call to, which we've determined as described above, and _mask_ instructs MessageBird to use the proxy number instead of the original caller ID.
@@ -339,11 +339,11 @@ The `<Transfer />` element takes two attributes: _destination_ indicates the num
 If we don't find a ride, we return a different XML snippet with a `<Say />` element, which is used to read some instructions to the caller:
 
 ````javascript
-} else {
-    // Cannot match numbers
-    res.send('<?xml version="1.0" encoding="UTF-8"?>'
-        + '<Say language="en-GB" voice="female">Sorry, we cannot identify your transaction. Make sure you call in from the number you registered.</Say>');
-}
+            } else {
+                // Cannot match numbers
+                res.send('<?xml version="1.0" encoding="UTF-8"?>'
+                    + '<Say language="en-GB" voice="female">Sorry, we cannot identify your transaction. Make sure you call in from the number you registered.</Say>');
+            }
 ````
 
 This element takes two attributes, _language_ and _voice_, that define the configuration for speech synthesis. The text itself goes between the opening and closing XML element.
@@ -368,12 +368,8 @@ You can then test voice call forwarding as well: call the proxy number from one 
 
 You've just built your own number masking system with MessageBird! 
 
-You can now use the flow, code snippets and UI examples from this tutorial as an inspiration to build your own custom notification system.
-
-Running into issues? Explore the [complete code on GitHub](https://github.com/messagebirdguides/masked-numbers-guide) to see whether you might have missed something. 
+You can now use the flow, code snippets and UI examples from this tutorial as an inspiration to build your own application. Don't forget to download the code from the [MessageBird Developer Guides GitHub repository](https://github.com/messagebirdguides/masked-numbers-guide).
 
 ## Next steps
 
 Want to build something similar but not quite sure how to get started? Please feel free to let us know at support@messagebird.com, we'd love to help!
-
-
